@@ -17,14 +17,13 @@ import {
   Image,
   Alert,
 } from 'react-native';
+import Config from 'react-native-config';
 
 const pageSize = 10;
 
 export default function Tags(): JSX.Element {
   const navigation = useNavigation<any>();
 
-  const [ip, setIp] = React.useState<string>('');
-  const [port, setPort] = React.useState<string>('');
   const [source, setSource] = React.useState<string>();
   const [tags, setTags] = React.useState<CollectionTag[]>([]);
 
@@ -40,8 +39,8 @@ export default function Tags(): JSX.Element {
       filterTag += `source=${encodeURI(source)}&`;
     }
 
-    return `${ip}${port ? ':' + port : ''}/api/all-tags${filterTag}`;
-  }, [ip, port, source]);
+    return `${Config.BASE_URL}/api/all-tags${filterTag}`;
+  }, [source]);
 
   React.useEffect(() => {
     console.log('React.useEffect', url);
@@ -54,7 +53,13 @@ export default function Tags(): JSX.Element {
     try {
       console.log('URL: ', url);
 
-      const response = await fetch(`${url}page=1&page_size=${pageSize}`);
+      const isDev = Config.IS_DEV === 'true';
+
+      const isDevFilter = isDev ? '&is_dev=true' : '';
+
+      const response = await fetch(
+        `${url}page=1&page_size=${pageSize}${isDevFilter}`,
+      );
 
       if (response.status === 200) {
         const data = await response.json();
@@ -74,9 +79,14 @@ export default function Tags(): JSX.Element {
     try {
       if (!loading && !loadingMore && !cannotLoadMore) {
         setLoadingMore(true);
+
+        const isDev = Config.IS_DEV === 'true';
+
+        const isDevFilter = isDev ? '&is_dev=true' : '';
+
         // Load more tags
         const response = await fetch(
-          `${url}page=${page + 1}&page_size=${pageSize}`,
+          `${url}page=${page + 1}&page_size=${pageSize}${isDevFilter}`,
         );
 
         if (response.status === 200) {
@@ -98,15 +108,6 @@ export default function Tags(): JSX.Element {
   }, [loading, loadingMore, cannotLoadMore, tags, page, url]);
 
   const handleRefresh = async (url: string) => {
-    const storedIp = await AsyncStorage.getItem('ip');
-    const storedPort = await AsyncStorage.getItem('port');
-
-    if (storedIp) {
-      setIp(storedIp);
-    }
-    if (storedPort) {
-      setPort(storedPort);
-    }
     setPage(1);
     await refreshTags(url);
   };

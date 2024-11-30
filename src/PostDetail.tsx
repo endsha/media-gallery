@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import Gallery from 'react-native-awesome-gallery';
+import Config from 'react-native-config';
 
 export default function PostDetail({ route, navigation }: any): JSX.Element {
   const { post } = route.params;
@@ -31,12 +32,17 @@ export default function PostDetail({ route, navigation }: any): JSX.Element {
   const loadPostDetail = async (postId: string) => {
     setLoading(true);
     try {
-      const ip = await AsyncStorage.getItem('ip');
-      const port = await AsyncStorage.getItem('port');
+      const isDev = Config.IS_DEV === 'true';
+
+      console.log('isDev', isDev, Config.IS_DEV);
+
+      const isDevFilter = isDev ? '?is_dev=true' : '';
 
       const response = await fetch(
-        `${ip}${port ? ':' + port : ''}/api/post/${postId}`,
+        `${Config.BASE_URL}/api/post/${postId}${isDevFilter}`,
       );
+
+      console.log('response', response);
 
       if (response.status === 200) {
         const data = await response.json();

@@ -11,25 +11,15 @@ import {
 } from 'react-native';
 
 export default function Settings(): JSX.Element {
-  const [ip, setIp] = React.useState<string>('https://private.endsha.dev');
-  // const [ip, setIp] = React.useState<string>('192.168.100.22');
-  const [port, setPort] = React.useState<string>('');
-
   const [savedIp, setSavedIp] = React.useState<string>('');
   const [savedPort, setSavedPort] = React.useState<string>('');
 
-  const handleApplyHost = async () => {
-    await AsyncStorage.setItem('ip', ip);
-    await AsyncStorage.setItem('port', port);
-
-    setSavedIp(ip);
-    setSavedPort(port);
-  };
+  const handleApplyHost = async () => {};
 
   return (
     <View style={styles.container}>
       <View style={CommonStyles.flexRow.alignCenter}>
-        <TextInput
+        {/* <TextInput
           value={ip}
           style={styles.input}
           onChangeText={text => setIp(text)}
@@ -39,7 +29,7 @@ export default function Settings(): JSX.Element {
           value={port}
           style={styles.input}
           onChangeText={text => setPort(text)}
-        />
+        /> */}
         <View style={{ width: 8 }} />
         <TouchableOpacity style={styles.enterBtn} onPress={handleApplyHost}>
           <Text style={{ color: 'white' }}>Enter</Text>

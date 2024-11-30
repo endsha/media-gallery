@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Config from 'react-native-config';
 
 import CommonStyles from '@constants/styles';
 import Colors from '@constants/colors';
@@ -31,8 +32,6 @@ export default function ListPost(props: ListPostProps): JSX.Element {
   const navigation = useNavigation<any>();
 
   const [posts, setPosts] = React.useState<Post[]>([]);
-  const [ip, setIp] = React.useState<string>('');
-  const [port, setPort] = React.useState<string>('');
   const [loading, setLoading] = React.useState<boolean>(false);
   const [loadingMore, setLoadingMore] = React.useState<boolean>(false);
   const [cannotLoadMore, setCannotLoadMore] = React.useState<boolean>(true);
@@ -50,10 +49,10 @@ export default function ListPost(props: ListPostProps): JSX.Element {
     }
 
     if (isHot) {
-      return `${ip}${port ? ':' + port : ''}/api/hots${filterTag}`;
+      return `${Config.BASE_URL}/api/hots${filterTag}`;
     }
-    return `${ip}${port ? ':' + port : ''}/api/load-posts${filterTag}`;
-  }, [isHot, ip, port, tagId, source]);
+    return `${Config.BASE_URL}/api/load-posts${filterTag}`;
+  }, [isHot, tagId, source]);
 
   React.useEffect(() => {
     console.log('React.useEffect', url);
@@ -66,7 +65,15 @@ export default function ListPost(props: ListPostProps): JSX.Element {
     try {
       console.log('URL: ', url);
 
-      const response = await fetch(`${url}page=1&page_size=${pageSize}`);
+      const isDev = Config.IS_DEV === 'true';
+
+      const isDevFilter = isDev ? '&is_dev=true' : '';
+
+      const response = await fetch(
+        `${url}page=1&page_size=${pageSize}${isDevFilter}`,
+      );
+
+      console.log('RESPONSE: ', response);
 
       if (response.status === 200) {
         const data = await response.json();
@@ -85,9 +92,14 @@ export default function ListPost(props: ListPostProps): JSX.Element {
     try {
       if (!loading && !loadingMore && !cannotLoadMore && posts.length > 0) {
         setLoadingMore(true);
+
+        const isDev = Config.IS_DEV === 'true';
+
+        const isDevFilter = isDev ? '&is_dev=true' : '';
+
         // Load more posts
         const response = await fetch(
-          `${url}page=${page + 1}&page_size=${pageSize}`,
+          `${url}page=${page + 1}&page_size=${pageSize}${isDevFilter}`,
         );
 
         if (response.status === 200) {
@@ -108,15 +120,6 @@ export default function ListPost(props: ListPostProps): JSX.Element {
   }, [loading, loadingMore, cannotLoadMore, posts, page, url]);
 
   const handleRefresh = async (url: string) => {
-    const storedIp = await AsyncStorage.getItem('ip');
-    const storedPort = await AsyncStorage.getItem('port');
-
-    if (storedIp) {
-      setIp(storedIp);
-    }
-    if (storedPort) {
-      setPort(storedPort);
-    }
     setPage(1);
     await refreshPosts(url);
   };

@@ -25,7 +25,7 @@ export default function Favorite(): JSX.Element {
   const [modalVisible, setModalVisible] = React.useState<boolean>(false);
 
   const data = React.useMemo(() => {
-    return favoritePics.map(pic => ({ url: pic, id: pic }));
+    return favoritePics.map(pic => ({ url: pic, id: pic })).reverse();
   }, [favoritePics]);
 
   const loadFavoritePics = async () => {
